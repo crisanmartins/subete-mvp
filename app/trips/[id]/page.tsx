@@ -306,12 +306,21 @@ export default function TripDetailPage() {
   <div className="mt-6 rounded-lg bg-neutral-100 p-4 text-sm">
     <p>Este viaje fue publicado por ti.</p>
 
-    <Link
-      href={`/trips/${trip.id}/requests`}
-      className="mt-3 block rounded-lg bg-black px-4 py-2 text-center font-medium text-white"
-    >
-      Ver solicitudes
-    </Link>
+    <div className="mt-3 grid grid-cols-2 gap-3">
+      <Link
+        href={`/trips/${trip.id}/requests`}
+        className="rounded-lg border border-neutral-300 px-3 py-2 text-center font-medium"
+      >
+        Solicitudes
+      </Link>
+
+      <Link
+        href={`/trips/${trip.id}/coordination`}
+        className="rounded-lg bg-black px-3 py-2 text-center font-medium text-white"
+      >
+        Coordinar
+      </Link>
+    </div>
   </div>
 )}
 
@@ -331,6 +340,14 @@ export default function TripDetailPage() {
                   Cancelar solicitud
                 </button>
               )}
+              {rideRequest.status === "accepted" && (
+  <Link
+    href={`/trips/${trip.id}/coordination`}
+    className="mt-4 block rounded-lg bg-black px-4 py-3 text-center font-medium text-white"
+  >
+    Coordinar viaje
+  </Link>
+)}
             </div>
           )}
 

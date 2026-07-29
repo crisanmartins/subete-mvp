@@ -292,6 +292,14 @@ export default function TripRequestsPage() {
                   </button>
                 </div>
               )}
+              {request.status === "accepted" && (
+  <Link
+    href={`/trips/${tripId}/coordination`}
+    className="mt-5 block w-full rounded-lg bg-black px-4 py-3 text-center font-medium text-white"
+  >
+    Coordinar por WhatsApp
+  </Link>
+)}
             </article>
           ))}
         </section>
