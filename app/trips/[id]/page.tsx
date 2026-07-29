@@ -211,21 +211,49 @@ async function manageTrip(action: "complete" | "cancel") {
   setError(null);
   setIsSubmitting(true);
 
-  const functionName =
-    action === "complete" ? "complete_trip" : "cancel_trip";
+  try {
+    const result =
+      action === "complete"
+        ? await supabase.rpc("complete_trip", {
+            p_trip_id: tripId,
+          })
+        : await supabase.rpc("cancel_trip", {
+            p_trip_id: tripId,
+          });
 
-  const { error: actionError } = await supabase.rpc(functionName, {
-    p_trip_id: tripId,
-  });
+    if (result.error) {
+      console.error(result.error);
+      setError(`No se pudo actualizar el viaje: ${result.error.message}`);
+      return;
+    }
 
-  if (actionError) {
-    setError(actionError.message);
+    setTrip((currentTrip) =>
+      currentTrip
+        ? {
+            ...currentTrip,
+            status: action === "complete" ? "completed" : "cancelled",
+          }
+        : currentTrip,
+    );
+
+    window.alert(
+      action === "complete"
+        ? "El viaje fue marcado como realizado."
+        : "El viaje fue cancelado.",
+    );
+
+    router.push("/protected");
+  } catch (caughtError) {
+    console.error(caughtError);
+
+    setError(
+      caughtError instanceof Error
+        ? caughtError.message
+        : "Ocurrió un error inesperado.",
+    );
+  } finally {
     setIsSubmitting(false);
-    return;
   }
-
-  router.push("/protected");
-  router.refresh();
 }
 
   function formatDeparture(value: string) {
