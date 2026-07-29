@@ -303,10 +303,17 @@ export default function TripDetailPage() {
           )}
 
           {isOwnTrip && (
-            <div className="mt-6 rounded-lg bg-neutral-100 p-4 text-sm">
-              Este viaje fue publicado por ti.
-            </div>
-          )}
+  <div className="mt-6 rounded-lg bg-neutral-100 p-4 text-sm">
+    <p>Este viaje fue publicado por ti.</p>
+
+    <Link
+      href={`/trips/${trip.id}/requests`}
+      className="mt-3 block rounded-lg bg-black px-4 py-2 text-center font-medium text-white"
+    >
+      Ver solicitudes
+    </Link>
+  </div>
+)}
 
           {!isOwnTrip && rideRequest && (
             <div className="mt-6 rounded-lg bg-neutral-100 p-4">
