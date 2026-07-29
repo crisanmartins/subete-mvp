@@ -169,29 +169,64 @@ export default function TripDetailPage() {
   }
 
   async function cancelRequest() {
-    if (!rideRequest) return;
+  if (!rideRequest) return;
 
-    setError(null);
-    setIsSubmitting(true);
+  const confirmed = window.confirm(
+    "¿Seguro que quieres cancelar tu solicitud?",
+  );
 
-    const { error: cancelError } = await supabase
-      .from("ride_requests")
-      .update({ status: "cancelled" })
-      .eq("id", rideRequest.id);
+  if (!confirmed) return;
 
-    if (cancelError) {
-      setError(cancelError.message);
-      setIsSubmitting(false);
-      return;
-    }
+  setError(null);
+  setIsSubmitting(true);
 
-    setRideRequest({
-      ...rideRequest,
-      status: "cancelled",
-    });
+  const { error: cancelError } = await supabase.rpc(
+    "cancel_ride_request",
+    {
+      p_request_id: rideRequest.id,
+    },
+  );
 
+  if (cancelError) {
+    setError(cancelError.message);
     setIsSubmitting(false);
+    return;
   }
+
+  setRideRequest({
+    ...rideRequest,
+    status: "cancelled",
+  });
+
+  setIsSubmitting(false);
+}
+async function manageTrip(action: "complete" | "cancel") {
+  const confirmationMessage =
+    action === "complete"
+      ? "¿Confirmas que este viaje fue realizado?"
+      : "¿Seguro que quieres cancelar este viaje? Las solicitudes activas también se cancelarán.";
+
+  if (!window.confirm(confirmationMessage)) return;
+
+  setError(null);
+  setIsSubmitting(true);
+
+  const functionName =
+    action === "complete" ? "complete_trip" : "cancel_trip";
+
+  const { error: actionError } = await supabase.rpc(functionName, {
+    p_trip_id: tripId,
+  });
+
+  if (actionError) {
+    setError(actionError.message);
+    setIsSubmitting(false);
+    return;
+  }
+
+  router.push("/protected");
+  router.refresh();
+}
 
   function formatDeparture(value: string) {
     return new Intl.DateTimeFormat("es-CL", {
@@ -321,6 +356,34 @@ export default function TripDetailPage() {
         Coordinar
       </Link>
     </div>
+
+    {trip.status !== "completed" && trip.status !== "cancelled" && (
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => manageTrip("complete")}
+          className="rounded-lg border border-neutral-300 px-3 py-2 text-center font-medium disabled:opacity-50"
+        >
+          Marcar realizado
+        </button>
+
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => manageTrip("cancel")}
+          className="rounded-lg px-3 py-2 text-center font-medium text-red-700 disabled:opacity-50"
+        >
+          Cancelar viaje
+        </button>
+      </div>
+    )}
+
+    {error && (
+      <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        {error}
+      </p>
+    )}
   </div>
 )}
 
@@ -330,16 +393,17 @@ export default function TripDetailPage() {
                 {requestStatusLabel(rideRequest.status)}
               </p>
 
-              {rideRequest.status === "pending" && (
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={cancelRequest}
-                  className="mt-3 text-sm font-medium underline disabled:opacity-50"
-                >
-                  Cancelar solicitud
-                </button>
-              )}
+              {(rideRequest.status === "pending" ||
+  rideRequest.status === "accepted") && (
+  <button
+    type="button"
+    disabled={isSubmitting}
+    onClick={cancelRequest}
+    className="mt-3 text-sm font-medium text-red-700 underline disabled:opacity-50"
+  >
+    Cancelar solicitud
+  </button>
+)}
               {rideRequest.status === "accepted" && (
   <Link
     href={`/trips/${trip.id}/coordination`}
