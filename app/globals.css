@@ -66,3 +66,23 @@
     @apply bg-background text-foreground;
   }
 }
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: #f5f5f5;
+  color: #171717;
+}
+
+input,
+select,
+textarea {
+  background-color: white;
+  color: #171717;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #737373;
+}
