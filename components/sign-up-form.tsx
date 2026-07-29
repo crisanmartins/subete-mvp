@@ -32,6 +32,21 @@ export function SignUpForm({
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
+    const normalizedEmail = email.trim().toLowerCase();
+
+const allowedDomains = ["@alumnos.uai.cl", "@uai.cl"];
+
+const isAllowedEmail = allowedDomains.some((domain) =>
+  normalizedEmail.endsWith(domain),
+);
+
+if (!isAllowedEmail) {
+  setError(
+    "Debes registrarte con un correo @alumnos.uai.cl o @uai.cl",
+  );
+  setIsLoading(false);
+  return;
+}
 
     if (password !== repeatPassword) {
       setError("Passwords do not match");
@@ -41,7 +56,7 @@ export function SignUpForm({
 
     try {
       const { error } = await supabase.auth.signUp({
-        email,
+        email: normalizedEmail,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/protected`,
