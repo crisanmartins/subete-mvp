@@ -39,7 +39,9 @@ export default function TripDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+useEffect(() => {
+  setIsSubmitting(false);
+}, [tripId]);
   useEffect(() => {
     async function loadTrip() {
       const {
